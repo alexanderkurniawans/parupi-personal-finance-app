@@ -23,16 +23,16 @@ function TopHeader() {
   )
 }
 
-// Balance Card Component
+// Balance Card Component with Premium Dark Gradients
 function BalanceCard() {
   const [activeSlide, setActiveSlide] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const balances = [
-    { label: 'Total Uang', amount: '28.450.000' },
-    { label: 'E-Money', amount: '2.930.000' },
-    { label: 'Bank', amount: '18.300.000' },
-    { label: 'Cash', amount: '7.220.000' },
+    { label: 'Total Uang', amount: '28.450.000', gradient: 'from-purple-900/60 to-neutral-950' },
+    { label: 'Bank', amount: '18.300.000', gradient: 'from-amber-900/60 to-neutral-950' },
+    { label: 'E-Money', amount: '2.930.000', gradient: 'from-blue-900/60 to-neutral-950' },
+    { label: 'Cash', amount: '7.220.000', gradient: 'from-emerald-900/60 to-neutral-950' },
   ]
 
   const handleScroll = () => {
@@ -50,12 +50,12 @@ function BalanceCard() {
         ref={scrollRef}
         onScroll={handleScroll}
         className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 -mx-4 px-4"
-        style={{ scrollBehavior: 'smooth' }}
+        style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
       >
         {balances.map((balance, idx) => (
           <div
             key={idx}
-            className="flex-shrink-0 w-full snap-center bg-neutral-950 rounded-2xl p-6"
+            className={`flex-shrink-0 w-full snap-center bg-gradient-to-br ${balance.gradient} rounded-2xl p-6 backdrop-blur-md border border-white/5`}
           >
             <p className="text-xs text-neutral-400 mb-3 uppercase tracking-wide">{balance.label}</p>
             <div className="flex items-baseline gap-1">
@@ -81,70 +81,102 @@ function BalanceCard() {
   )
 }
 
-// Pending Queue Component (Swipe-to-Confirm)
+// Pending Queue Component (Swipe-to-Confirm with Mobile Support)
 function PendingQueue() {
   const [dragX, setDragX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
   const dragRef = useRef<HTMLDivElement>(null)
+  const startX = useRef(0)
 
-  const handleMouseDown = () => setIsDragging(true)
-  const handleMouseUp = () => {
-    setIsDragging(false)
-    setDragX(0)
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true)
+    startX.current = 'touches' in e ? e.touches[0].clientX : e.clientX
   }
-  const handleMouseMove = (e: React.MouseEvent) => {
+
+  const handleDragEnd = () => {
+    setIsDragging(false)
+    if (Math.abs(dragX) > 60) {
+      if (dragX > 0) confirmAccept()
+      else confirmReject()
+    } else {
+      setDragX(0)
+    }
+  }
+
+  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging || !dragRef.current) return
+    const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX
     const rect = dragRef.current.getBoundingClientRect()
-    const newX = e.clientX - rect.left - 60
-    setDragX(Math.max(-80, Math.min(80, newX)))
+    const newX = currentX - startX.current
+    setDragX(Math.max(-100, Math.min(100, newX)))
+  }
+
+  const showNotification = (message: string) => {
+    setToastMessage(message)
+    setShowToast(true)
+    setTimeout(() => setShowToast(false), 2000)
   }
 
   const confirmAccept = () => {
-    console.log('[v0] Transaction confirmed')
+    showNotification('Transaksi dikonfirmasi')
     setDragX(0)
   }
 
   const confirmReject = () => {
-    console.log('[v0] Transaction rejected')
+    showNotification('Transaksi ditolak')
     setDragX(0)
   }
 
   return (
-    <div className="relative h-20 rounded-xl overflow-hidden">
-      {/* Background layers revealed on drag */}
-      <div className="absolute inset-0 flex">
-        <div className="flex-1 bg-red-600 flex items-center px-4">
-          <span className="text-xs font-semibold text-white sr-only">Tolak</span>
+    <>
+      <div className="relative h-20 rounded-xl overflow-hidden">
+        {/* Background layers revealed on drag */}
+        <div className="absolute inset-0 flex">
+          <div className="flex-1 bg-red-600 flex items-center px-4">
+            <span className="text-xs font-semibold text-white sr-only">Tolak</span>
+          </div>
+          <div className="flex-1 bg-[#00D166] flex items-center justify-end px-4">
+            <span className="text-xs font-semibold text-black sr-only">Setuju</span>
+          </div>
         </div>
-        <div className="flex-1 bg-[#00D166] flex items-center justify-end px-4">
-          <span className="text-xs font-semibold text-black sr-only">Setuju</span>
+
+        {/* Draggable card */}
+        <div
+          ref={dragRef}
+          onMouseDown={handleDragStart}
+          onMouseUp={handleDragEnd}
+          onMouseMove={handleDragMove}
+          onMouseLeave={handleDragEnd}
+          onTouchStart={handleDragStart}
+          onTouchEnd={handleDragEnd}
+          onTouchMove={handleDragMove}
+          className="absolute inset-0 bg-neutral-900 rounded-xl p-4 cursor-grab active:cursor-grabbing transition-transform select-none"
+          style={{ transform: `translateX(${dragX}px)` }}
+        >
+          <div className="flex items-center justify-between h-full">
+            <p className="text-sm text-white font-medium flex-1">Makan siang Solaria</p>
+            <p className="text-sm font-mono font-semibold text-neutral-300">Rp 145.000</p>
+          </div>
         </div>
+
+        {/* Accessibility buttons (sr-only) */}
+        <button onClick={confirmReject} className="sr-only">
+          Tolak transaksi
+        </button>
+        <button onClick={confirmAccept} className="sr-only">
+          Setuju transaksi
+        </button>
       </div>
 
-      {/* Draggable card */}
-      <div
-        ref={dragRef}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseUp}
-        className="absolute inset-0 bg-neutral-900 rounded-xl p-4 cursor-grab active:cursor-grabbing transition-transform"
-        style={{ transform: `translateX(${dragX}px)` }}
-      >
-        <div className="flex items-center justify-between h-full">
-          <p className="text-sm text-white font-medium flex-1">Makan siang Solaria</p>
-          <p className="text-sm font-mono font-semibold text-neutral-300">Rp 145.000</p>
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-neutral-800 text-white px-4 py-2 rounded-lg text-sm font-medium z-20 animate-in fade-in duration-300">
+          {toastMessage}
         </div>
-      </div>
-
-      {/* Accessibility buttons (sr-only) */}
-      <button onClick={confirmReject} className="sr-only">
-        Tolak transaksi
-      </button>
-      <button onClick={confirmAccept} className="sr-only">
-        Setuju transaksi
-      </button>
-    </div>
+      )}
+    </>
   )
 }
 
@@ -244,7 +276,7 @@ function RecentTransactions() {
   }
 
   return (
-    <div className="pb-32">
+    <div className="pb-24">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base text-white font-semibold">Transaksi Terbaru</h3>
         <button className="text-xs text-neutral-400 hover:bg-neutral-800 active:scale-95 px-3 py-1 rounded transition">
@@ -420,11 +452,15 @@ export default function Page() {
           <div className="flex flex-col gap-6 px-4 py-4">
             <TopHeader />
             <BalanceCard />
-            <PendingQueue />
             <QuickActions />
             <BudgetBar />
             <RecentTransactions />
           </div>
+        </div>
+
+        {/* Pending Queue - Positioned Above Bottom Nav for Thumb Zone */}
+        <div className="px-4 py-3 bg-black border-t border-neutral-900">
+          <PendingQueue />
         </div>
 
         {/* Bottom Navigation */}
