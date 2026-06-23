@@ -46,7 +46,7 @@ function BalanceCard() {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 -mx-2 px-2"
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 -mx-2 px-2 bg-gradient-to-r from-black via-transparent to-black"
         style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
       >
         {balances.map((balance, idx) => (
