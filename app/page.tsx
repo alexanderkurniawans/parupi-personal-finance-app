@@ -23,16 +23,16 @@ function TopHeader() {
   )
 }
 
-// Balance Card Component with Premium Dark Gradients
+// Balance Card Component with Apple HIG Dark Mode Gradients
 function BalanceCard() {
   const [activeSlide, setActiveSlide] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const balances = [
-    { label: 'Total Uang', amount: '28.450.000', gradient: 'from-purple-900/60 to-neutral-950' },
-    { label: 'Bank', amount: '18.300.000', gradient: 'from-amber-900/60 to-neutral-950' },
-    { label: 'E-Money', amount: '2.930.000', gradient: 'from-blue-900/60 to-neutral-950' },
-    { label: 'Cash', amount: '7.220.000', gradient: 'from-emerald-900/60 to-neutral-950' },
+    { label: 'Total Uang', amount: '28.450.000', gradient: 'from-purple-900/40 to-black' },
+    { label: 'Bank', amount: '18.300.000', gradient: 'from-yellow-900/40 to-black' },
+    { label: 'E-Money', amount: '2.930.000', gradient: 'from-blue-900/40 to-black' },
+    { label: 'Cash', amount: '7.220.000', gradient: 'from-green-900/40 to-black' },
   ]
 
   const handleScroll = () => {
@@ -55,12 +55,12 @@ function BalanceCard() {
         {balances.map((balance, idx) => (
           <div
             key={idx}
-            className={`flex-shrink-0 w-full snap-center bg-gradient-to-br ${balance.gradient} rounded-2xl p-6 backdrop-blur-md border border-white/5`}
+            className={`flex-shrink-0 w-full snap-center bg-gradient-to-br ${balance.gradient} rounded-2xl p-6 border border-white/5 transition-all duration-300 ease-out`}
           >
-            <p className="text-xs text-neutral-400 mb-3 uppercase tracking-wide">{balance.label}</p>
+            <p className="text-xs text-neutral-500 mb-3 uppercase tracking-wide transition-all duration-300 ease-out">{balance.label}</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-neutral-400 text-sm">Rp</span>
-              <p className="text-white text-4xl font-mono font-bold tabular-nums">{balance.amount}</p>
+              <span className="text-neutral-500 text-sm transition-all duration-300 ease-out">Rp</span>
+              <p className="text-white text-4xl font-mono font-bold tabular-nums transition-all duration-300 ease-out">{balance.amount}</p>
             </div>
           </div>
         ))}
@@ -81,7 +81,7 @@ function BalanceCard() {
   )
 }
 
-// Pending Queue Component (Swipe-to-Confirm with Mobile Support)
+// Pending Queue Component (Apple HIG Swipe-to-Confirm)
 function PendingQueue() {
   const [dragX, setDragX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -98,7 +98,9 @@ function PendingQueue() {
   const handleDragEnd = () => {
     setIsDragging(false)
     if (Math.abs(dragX) > 60) {
-      if (dragX > 0) confirmAccept()
+      // RIGHT drag = Approve (Success)
+      if (dragX > 0) confirmApprove()
+      // LEFT drag = Reject (Destructive)
       else confirmReject()
     } else {
       setDragX(0)
@@ -108,7 +110,6 @@ function PendingQueue() {
   const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging || !dragRef.current) return
     const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX
-    const rect = dragRef.current.getBoundingClientRect()
     const newX = currentX - startX.current
     setDragX(Math.max(-100, Math.min(100, newX)))
   }
@@ -119,8 +120,8 @@ function PendingQueue() {
     setTimeout(() => setShowToast(false), 2000)
   }
 
-  const confirmAccept = () => {
-    showNotification('Transaksi dikonfirmasi')
+  const confirmApprove = () => {
+    showNotification('Transaksi disetujui')
     setDragX(0)
   }
 
@@ -129,20 +130,22 @@ function PendingQueue() {
     setDragX(0)
   }
 
+  // Calculate background color transition based on drag direction
+  const getBackgroundColor = () => {
+    if (dragX > 30) {
+      // Dragging right = green success state
+      return 'bg-gradient-to-r from-green-500/20 to-neutral-900'
+    } else if (dragX < -30) {
+      // Dragging left = red reject state
+      return 'bg-gradient-to-r from-neutral-900 to-red-500/20'
+    }
+    return 'bg-neutral-900'
+  }
+
   return (
     <>
-      <div className="relative h-20 rounded-xl overflow-hidden">
-        {/* Background layers revealed on drag */}
-        <div className="absolute inset-0 flex">
-          <div className="flex-1 bg-red-600 flex items-center px-4">
-            <span className="text-xs font-semibold text-white sr-only">Tolak</span>
-          </div>
-          <div className="flex-1 bg-[#00D166] flex items-center justify-end px-4">
-            <span className="text-xs font-semibold text-black sr-only">Setuju</span>
-          </div>
-        </div>
-
-        {/* Draggable card */}
+      <div className="relative h-20 rounded-xl overflow-hidden border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 ease-out">
+        {/* Draggable card with feedback background */}
         <div
           ref={dragRef}
           onMouseDown={handleDragStart}
@@ -152,21 +155,33 @@ function PendingQueue() {
           onTouchStart={handleDragStart}
           onTouchEnd={handleDragEnd}
           onTouchMove={handleDragMove}
-          className="absolute inset-0 bg-neutral-900 rounded-xl p-4 cursor-grab active:cursor-grabbing transition-transform select-none"
+          className={`absolute inset-0 rounded-xl p-4 cursor-grab active:cursor-grabbing select-none transition-all duration-300 ease-out ${getBackgroundColor()}`}
           style={{ transform: `translateX(${dragX}px)` }}
         >
           <div className="flex items-center justify-between h-full">
-            <p className="text-sm text-white font-medium flex-1">Makan siang Solaria</p>
-            <p className="text-sm font-mono font-semibold text-neutral-300">Rp 145.000</p>
+            <p className="text-sm text-white font-medium flex-1 transition-all duration-300 ease-out">Makan siang Solaria</p>
+            <p className="text-sm font-mono font-semibold text-neutral-300 transition-all duration-300 ease-out">Rp 145.000</p>
           </div>
+
+          {/* Swipe direction hints */}
+          {dragX > 20 && (
+            <div className="absolute inset-0 flex items-center justify-start pl-4 pointer-events-none">
+              <span className="text-xs font-semibold text-green-400 transition-all duration-300 ease-out">← Setujui</span>
+            </div>
+          )}
+          {dragX < -20 && (
+            <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none">
+              <span className="text-xs font-semibold text-red-400 transition-all duration-300 ease-out">Tolak →</span>
+            </div>
+          )}
         </div>
 
         {/* Accessibility buttons (sr-only) */}
         <button onClick={confirmReject} className="sr-only">
           Tolak transaksi
         </button>
-        <button onClick={confirmAccept} className="sr-only">
-          Setuju transaksi
+        <button onClick={confirmApprove} className="sr-only">
+          Setujui transaksi
         </button>
       </div>
 
@@ -458,8 +473,8 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Pending Queue - Positioned Above Bottom Nav for Thumb Zone */}
-        <div className="px-4 py-3 bg-black border-t border-neutral-900">
+        {/* Pending Queue - Sticky positioning above Bottom Nav (Apple HIG thumb zone) */}
+        <div className="sticky bottom-20 px-4 py-3 bg-black border-t border-neutral-900 z-20">
           <PendingQueue />
         </div>
 
