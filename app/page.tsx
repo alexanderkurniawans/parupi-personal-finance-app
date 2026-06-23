@@ -29,10 +29,10 @@ function BalanceCard() {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const balances = [
-    { label: 'Total Uang', amount: '28.450.000', gradient: 'from-purple-900/40 to-black' },
-    { label: 'Bank', amount: '18.300.000', gradient: 'from-yellow-900/40 to-black' },
-    { label: 'E-Money', amount: '2.930.000', gradient: 'from-blue-900/40 to-black' },
-    { label: 'Cash', amount: '7.220.000', gradient: 'from-green-900/40 to-black' },
+    { label: 'Total Uang', amount: '28.450.000', gradient: 'from-purple-800/60 to-purple-950' },
+    { label: 'Bank', amount: '18.300.000', gradient: 'from-yellow-700/60 to-yellow-950' },
+    { label: 'E-Money', amount: '2.930.000', gradient: 'from-blue-800/60 to-blue-950' },
+    { label: 'Cash', amount: '7.220.000', gradient: 'from-green-800/60 to-green-950' },
   ]
 
   const handleScroll = () => {
@@ -45,21 +45,25 @@ function BalanceCard() {
   }
 
   return (
-    <div>
+    <div className="bg-gradient-to-br from-neutral-900/40 to-neutral-950/60 backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+      {/* Header */}
+      <p className="text-sm text-neutral-400 font-semibold mb-4 uppercase tracking-wide">Saldo Anda</p>
+      
+      {/* Carousel Container */}
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 -mx-4 px-4"
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 -mx-2 px-2"
         style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
       >
         {balances.map((balance, idx) => (
           <div
             key={idx}
-            className={`flex-shrink-0 w-full snap-center bg-gradient-to-br ${balance.gradient} rounded-2xl p-6 border border-white/5 transition-all duration-300 ease-out`}
+            className={`flex-shrink-0 w-full snap-center bg-gradient-to-br ${balance.gradient} rounded-2xl p-6 border border-white/10 transition-all duration-300 ease-out shadow-lg`}
           >
-            <p className="text-xs text-neutral-500 mb-3 uppercase tracking-wide transition-all duration-300 ease-out">{balance.label}</p>
+            <p className="text-xs text-white/70 mb-3 uppercase tracking-wide transition-all duration-300 ease-out">{balance.label}</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-neutral-500 text-sm transition-all duration-300 ease-out">Rp</span>
+              <span className="text-white/60 text-sm transition-all duration-300 ease-out">Rp</span>
               <p className="text-white text-4xl font-mono font-bold tabular-nums transition-all duration-300 ease-out">{balance.amount}</p>
             </div>
           </div>
@@ -67,12 +71,12 @@ function BalanceCard() {
       </div>
 
       {/* Carousel Indicators */}
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="flex justify-center gap-2 mt-5">
         {balances.map((_, idx) => (
           <div
             key={idx}
             className={`h-1.5 rounded-full transition-all ${
-              idx === activeSlide ? 'bg-[#00D166] w-6' : 'bg-neutral-700 w-1.5'
+              idx === activeSlide ? 'bg-[#00D166] w-6' : 'bg-neutral-600 w-1.5'
             }`}
           ></div>
         ))}
@@ -130,21 +134,27 @@ function PendingQueue() {
     setDragX(0)
   }
 
-  // Calculate background color transition based on drag direction
+  // Calculate background color and border based on drag direction
   const getBackgroundColor = () => {
     if (dragX > 30) {
       // Dragging right = green success state
-      return 'bg-gradient-to-r from-green-500/20 to-neutral-900'
+      return 'bg-gradient-to-r from-green-500/30 via-neutral-900 to-neutral-900 border-green-500/60'
     } else if (dragX < -30) {
       // Dragging left = red reject state
-      return 'bg-gradient-to-r from-neutral-900 to-red-500/20'
+      return 'bg-gradient-to-r from-neutral-900 via-neutral-900 to-red-500/30 border-red-500/60'
     }
-    return 'bg-neutral-900'
+    return 'bg-neutral-900 border-white/10'
+  }
+
+  const getBorderClass = () => {
+    if (dragX > 30) return 'border-2 border-green-500/70'
+    if (dragX < -30) return 'border-2 border-red-500/70'
+    return 'border border-white/10'
   }
 
   return (
     <>
-      <div className="relative h-20 rounded-xl overflow-hidden border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 ease-out">
+      <div className={`relative h-20 rounded-xl overflow-hidden backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-300 ease-out ${getBorderClass()}`}>
         {/* Draggable card with feedback background */}
         <div
           ref={dragRef}
@@ -162,18 +172,6 @@ function PendingQueue() {
             <p className="text-sm text-white font-medium flex-1 transition-all duration-300 ease-out">Makan siang Solaria</p>
             <p className="text-sm font-mono font-semibold text-neutral-300 transition-all duration-300 ease-out">Rp 145.000</p>
           </div>
-
-          {/* Swipe direction hints */}
-          {dragX > 20 && (
-            <div className="absolute inset-0 flex items-center justify-start pl-4 pointer-events-none">
-              <span className="text-xs font-semibold text-green-400 transition-all duration-300 ease-out">← Setujui</span>
-            </div>
-          )}
-          {dragX < -20 && (
-            <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none">
-              <span className="text-xs font-semibold text-red-400 transition-all duration-300 ease-out">Tolak →</span>
-            </div>
-          )}
         </div>
 
         {/* Accessibility buttons (sr-only) */}
