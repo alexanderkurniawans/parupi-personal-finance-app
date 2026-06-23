@@ -3,36 +3,21 @@
 import React, { useState, useRef } from 'react'
 import { Bell, Send, X, Home, BarChart3, History, Settings, Plus, Utensils, Salad, Zap, Plane, TrendingUp, ShoppingCart } from 'lucide-react'
 
-// Top Header Component
+// Top Header Component (Empty - Avatar moved to BalanceCard)
 function TopHeader() {
-  return (
-    <div className="flex items-center justify-between">
-      <button
-        className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-white font-semibold text-sm hover:bg-neutral-700 active:scale-95 transition"
-        aria-label="User profile"
-      >
-        AK
-      </button>
-      <button
-        className="w-10 h-10 rounded-full flex items-center justify-center text-neutral-400 hover:bg-neutral-800 active:scale-95 transition"
-        aria-label="Notifications"
-      >
-        <Bell size={20} />
-      </button>
-    </div>
-  )
+  return null
 }
 
-// Balance Card Component
+// Balance Card Component with Apple HIG Dark Mode Gradients
 function BalanceCard() {
   const [activeSlide, setActiveSlide] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const balances = [
-    { label: 'Total Uang', amount: '28.450.000' },
-    { label: 'E-Money', amount: '2.930.000' },
-    { label: 'Bank', amount: '18.300.000' },
-    { label: 'Cash', amount: '7.220.000' },
+    { label: 'Total Uang', amount: '28.450.000', gradient: 'from-purple-800/60 to-purple-950' },
+    { label: 'Bank', amount: '18.300.000', gradient: 'from-yellow-700/60 to-yellow-950' },
+    { label: 'E-Money', amount: '2.930.000', gradient: 'from-blue-800/60 to-blue-950' },
+    { label: 'Cash', amount: '7.220.000', gradient: 'from-green-800/60 to-green-950' },
   ]
 
   const handleScroll = () => {
@@ -45,34 +30,46 @@ function BalanceCard() {
   }
 
   return (
-    <div>
+    <div className="bg-gradient-to-br from-[#00D166]/10 to-neutral-900/40 backdrop-blur-md border border-white/10 rounded-b-3xl p-6 shadow-[0_8px_32px_rgba(0,209,102,0.15)]">
+      {/* Header with Avatar */}
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-neutral-400 font-semibold uppercase tracking-wide">Saldo Anda</p>
+        <button
+          className="w-10 h-10 rounded-full bg-[#00D166]/20 backdrop-blur-sm border border-[#00D166]/50 flex items-center justify-center text-[#00D166] font-semibold text-sm hover:bg-[#00D166]/30 active:scale-95 transition"
+          aria-label="User profile"
+        >
+          AK
+        </button>
+      </div>
+      
+      {/* Carousel Container */}
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 -mx-4 px-4"
-        style={{ scrollBehavior: 'smooth' }}
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 -mx-2 px-2 bg-gradient-to-r from-black via-transparent to-black"
+        style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
       >
         {balances.map((balance, idx) => (
           <div
             key={idx}
-            className="flex-shrink-0 w-full snap-center bg-neutral-950 rounded-2xl p-6"
+            className={`flex-shrink-0 w-full snap-center bg-gradient-to-br ${balance.gradient} rounded-2xl p-6 border border-white/10 transition-all duration-300 ease-out shadow-lg`}
           >
-            <p className="text-xs text-neutral-400 mb-3 uppercase tracking-wide">{balance.label}</p>
+            <p className="text-xs text-white/70 mb-3 uppercase tracking-wide transition-all duration-300 ease-out">{balance.label}</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-neutral-400 text-sm">Rp</span>
-              <p className="text-white text-4xl font-mono font-bold tabular-nums">{balance.amount}</p>
+              <span className="text-white/60 text-sm transition-all duration-300 ease-out">Rp</span>
+              <p className="text-white text-4xl font-mono font-bold tabular-nums transition-all duration-300 ease-out">{balance.amount}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Carousel Indicators */}
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="flex justify-center gap-2 mt-5">
         {balances.map((_, idx) => (
           <div
             key={idx}
             className={`h-1.5 rounded-full transition-all ${
-              idx === activeSlide ? 'bg-[#00D166] w-6' : 'bg-neutral-700 w-1.5'
+              idx === activeSlide ? 'bg-[#00D166] w-6' : 'bg-neutral-600 w-1.5'
             }`}
           ></div>
         ))}
@@ -81,70 +78,111 @@ function BalanceCard() {
   )
 }
 
-// Pending Queue Component (Swipe-to-Confirm)
+// Pending Queue Component (Apple HIG Swipe-to-Confirm)
 function PendingQueue() {
   const [dragX, setDragX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
   const dragRef = useRef<HTMLDivElement>(null)
+  const startX = useRef(0)
 
-  const handleMouseDown = () => setIsDragging(true)
-  const handleMouseUp = () => {
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true)
+    startX.current = 'touches' in e ? e.touches[0].clientX : e.clientX
+  }
+
+  const handleDragEnd = () => {
     setIsDragging(false)
-    setDragX(0)
-  }
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !dragRef.current) return
-    const rect = dragRef.current.getBoundingClientRect()
-    const newX = e.clientX - rect.left - 60
-    setDragX(Math.max(-80, Math.min(80, newX)))
+    if (Math.abs(dragX) > 60) {
+      // RIGHT drag = Approve (Success)
+      if (dragX > 0) confirmApprove()
+      // LEFT drag = Reject (Destructive)
+      else confirmReject()
+    } else {
+      setDragX(0)
+    }
   }
 
-  const confirmAccept = () => {
-    console.log('[v0] Transaction confirmed')
+  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging || !dragRef.current) return
+    const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const newX = currentX - startX.current
+    setDragX(Math.max(-100, Math.min(100, newX)))
+  }
+
+  const showNotification = (message: string) => {
+    setToastMessage(message)
+    setShowToast(true)
+    setTimeout(() => setShowToast(false), 2000)
+  }
+
+  const confirmApprove = () => {
+    showNotification('Transaksi disetujui')
     setDragX(0)
   }
 
   const confirmReject = () => {
-    console.log('[v0] Transaction rejected')
+    showNotification('Transaksi ditolak')
     setDragX(0)
   }
 
+  // Calculate background color and border based on drag direction
+  const getBackgroundColor = () => {
+    if (dragX > 30) {
+      // Dragging right = green success state
+      return 'bg-gradient-to-r from-green-500/30 via-neutral-900 to-neutral-900 border-green-500/60'
+    } else if (dragX < -30) {
+      // Dragging left = red reject state
+      return 'bg-gradient-to-r from-neutral-900 via-neutral-900 to-red-500/30 border-red-500/60'
+    }
+    return 'bg-neutral-900 border-white/10'
+  }
+
+  const getBorderClass = () => {
+    if (dragX > 30) return 'border-2 border-green-500/70'
+    if (dragX < -30) return 'border-2 border-red-500/70'
+    return 'border border-white/10'
+  }
+
   return (
-    <div className="relative h-20 rounded-xl overflow-hidden">
-      {/* Background layers revealed on drag */}
-      <div className="absolute inset-0 flex">
-        <div className="flex-1 bg-red-600 flex items-center px-4">
-          <span className="text-xs font-semibold text-white sr-only">Tolak</span>
+    <>
+      <div className={`relative h-20 rounded-xl overflow-hidden backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-300 ease-out ${getBorderClass()}`}>
+        {/* Draggable card with feedback background */}
+        <div
+          ref={dragRef}
+          onMouseDown={handleDragStart}
+          onMouseUp={handleDragEnd}
+          onMouseMove={handleDragMove}
+          onMouseLeave={handleDragEnd}
+          onTouchStart={handleDragStart}
+          onTouchEnd={handleDragEnd}
+          onTouchMove={handleDragMove}
+          className={`absolute inset-0 rounded-xl p-4 cursor-grab active:cursor-grabbing select-none transition-all duration-300 ease-out ${getBackgroundColor()}`}
+          style={{ transform: `translateX(${dragX}px)` }}
+        >
+          <div className="flex items-center justify-between h-full">
+            <p className="text-sm text-white font-medium flex-1 transition-all duration-300 ease-out">Makan siang Solaria</p>
+            <p className="text-sm font-mono font-semibold text-neutral-300 transition-all duration-300 ease-out">Rp 145.000</p>
+          </div>
         </div>
-        <div className="flex-1 bg-[#00D166] flex items-center justify-end px-4">
-          <span className="text-xs font-semibold text-black sr-only">Setuju</span>
-        </div>
+
+        {/* Accessibility buttons (sr-only) */}
+        <button onClick={confirmReject} className="sr-only">
+          Tolak transaksi
+        </button>
+        <button onClick={confirmApprove} className="sr-only">
+          Setujui transaksi
+        </button>
       </div>
 
-      {/* Draggable card */}
-      <div
-        ref={dragRef}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseUp}
-        className="absolute inset-0 bg-neutral-900 rounded-xl p-4 cursor-grab active:cursor-grabbing transition-transform"
-        style={{ transform: `translateX(${dragX}px)` }}
-      >
-        <div className="flex items-center justify-between h-full">
-          <p className="text-sm text-white font-medium flex-1">Makan siang Solaria</p>
-          <p className="text-sm font-mono font-semibold text-neutral-300">Rp 145.000</p>
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-neutral-800 text-white px-4 py-2 rounded-lg text-sm font-medium z-20 animate-in fade-in duration-300">
+          {toastMessage}
         </div>
-      </div>
-
-      {/* Accessibility buttons (sr-only) */}
-      <button onClick={confirmReject} className="sr-only">
-        Tolak transaksi
-      </button>
-      <button onClick={confirmAccept} className="sr-only">
-        Setuju transaksi
-      </button>
-    </div>
+      )}
+    </>
   )
 }
 
@@ -244,7 +282,7 @@ function RecentTransactions() {
   }
 
   return (
-    <div className="pb-32">
+    <div className="pb-24">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base text-white font-semibold">Transaksi Terbaru</h3>
         <button className="text-xs text-neutral-400 hover:bg-neutral-800 active:scale-95 px-3 py-1 rounded transition">
@@ -417,14 +455,19 @@ export default function Page() {
       <div className="max-w-md mx-auto min-h-screen bg-black text-white relative flex flex-col overflow-hidden">
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto scrollbar-hide">
-          <div className="flex flex-col gap-6 px-4 py-4">
-            <TopHeader />
+          <div className="flex flex-col gap-6 px-0 py-0">
             <BalanceCard />
-            <PendingQueue />
-            <QuickActions />
-            <BudgetBar />
-            <RecentTransactions />
+            <div className="flex flex-col gap-6 px-4">
+              <QuickActions />
+              <BudgetBar />
+              <RecentTransactions />
+            </div>
           </div>
+        </div>
+
+        {/* Pending Queue - Sticky positioning above Bottom Nav (Apple HIG thumb zone) */}
+        <div className="sticky bottom-20 px-4 py-3 bg-black border-t border-neutral-900 z-20">
+          <PendingQueue />
         </div>
 
         {/* Bottom Navigation */}
