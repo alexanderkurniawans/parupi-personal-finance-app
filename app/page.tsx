@@ -3,24 +3,9 @@
 import React, { useState, useRef } from 'react'
 import { Bell, Send, X, Home, BarChart3, History, Settings, Plus, Utensils, Salad, Zap, Plane, TrendingUp, ShoppingCart } from 'lucide-react'
 
-// Top Header Component
+// Top Header Component (Empty - Avatar moved to BalanceCard)
 function TopHeader() {
-  return (
-    <div className="flex items-center justify-between">
-      <button
-        className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-white font-semibold text-sm hover:bg-neutral-700 active:scale-95 transition"
-        aria-label="User profile"
-      >
-        AK
-      </button>
-      <button
-        className="w-10 h-10 rounded-full flex items-center justify-center text-neutral-400 hover:bg-neutral-800 active:scale-95 transition"
-        aria-label="Notifications"
-      >
-        <Bell size={20} />
-      </button>
-    </div>
-  )
+  return null
 }
 
 // Balance Card Component with Apple HIG Dark Mode Gradients
@@ -45,9 +30,17 @@ function BalanceCard() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-neutral-900/40 to-neutral-950/60 backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-      {/* Header */}
-      <p className="text-sm text-neutral-400 font-semibold mb-4 uppercase tracking-wide">Saldo Anda</p>
+    <div className="bg-gradient-to-br from-[#00D166]/10 to-neutral-900/40 backdrop-blur-md border border-white/10 rounded-b-3xl p-6 shadow-[0_8px_32px_rgba(0,209,102,0.15)]">
+      {/* Header with Avatar */}
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-neutral-400 font-semibold uppercase tracking-wide">Saldo Anda</p>
+        <button
+          className="w-10 h-10 rounded-full bg-[#00D166]/20 backdrop-blur-sm border border-[#00D166]/50 flex items-center justify-center text-[#00D166] font-semibold text-sm hover:bg-[#00D166]/30 active:scale-95 transition"
+          aria-label="User profile"
+        >
+          AK
+        </button>
+      </div>
       
       {/* Carousel Container */}
       <div
@@ -462,12 +455,13 @@ export default function Page() {
       <div className="max-w-md mx-auto min-h-screen bg-black text-white relative flex flex-col overflow-hidden">
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto scrollbar-hide">
-          <div className="flex flex-col gap-6 px-4 py-4">
-            <TopHeader />
+          <div className="flex flex-col gap-6 px-0 py-0">
             <BalanceCard />
-            <QuickActions />
-            <BudgetBar />
-            <RecentTransactions />
+            <div className="flex flex-col gap-6 px-4">
+              <QuickActions />
+              <BudgetBar />
+              <RecentTransactions />
+            </div>
           </div>
         </div>
 
